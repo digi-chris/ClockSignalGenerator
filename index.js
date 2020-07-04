@@ -5,9 +5,19 @@ var r2 = new Gpio(21, 'out');
 r1.writeSync(0);
 r2.writeSync(0);
 
+var hourHand = 8;
+var minHand = 27;
+
 var polarity = false;
 
-function advance() {
+function autoAdvance() {
+    advance(true);
+    if (minHand != new Date().getMinutes()) {
+        setTimeout(autoAdvance, 500);
+    }
+}
+
+function advance(noReset) {
     polarity = !polarity;
     var value = 0;
     if(polarity) {
@@ -16,15 +26,26 @@ function advance() {
     r1.writeSync(value);
     r2.writeSync(value);
 
-    setTimeout(() => {
-        // This is a safety check, to turn the power off to the
-        // clock after sending the signal
-        if (value === 0) {
-            r1.writeSync(1);
-        } else {
-            r1.writeSync(0);
+    minHand++;
+    if (minHand > 59) {
+        minHand = 0;
+        hourHand++;
+        if (hourHand > 11) {
+            hourHand = 0;
         }
-    }, 250);
+    }
+
+    if (!noReset) {
+        setTimeout(() => {
+            // This is a safety check, to turn the power off to the
+            // clock after sending the signal
+            if (value === 0) {
+                r1.writeSync(1);
+            } else {
+                r1.writeSync(0);
+            }
+        }, 250);
+    }
 }
 
 var currentMinutes = new Date().getMinutes();
@@ -49,6 +70,10 @@ const keypress = async () => {
     //await keypress();
     //advance();
 })().then(process.exit);
+
+if (minHand != new Date().getMinutes()) {
+    autoAdvance();
+}
 
 setInterval(() => {
     var nowMinutes = new Date().getMinutes();
