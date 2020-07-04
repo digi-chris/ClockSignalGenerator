@@ -17,6 +17,8 @@ function advance() {
     r2.writeSync(value);
 }
 
+var currentMinutes = new Date().getMinutes();
+
 const keypress = async () => {
     process.stdin.setRawMode(true);
     return new Promise(resolve => process.stdin.once('data', data => {
@@ -31,9 +33,18 @@ const keypress = async () => {
 }
 
 ;(async () => {
-    advance();
+    //advance();
     await keypress();
-    advance();
-    await keypress();
-    advance();
+    //advance();
+    //await keypress();
+    //advance();
 })().then(process.exit);
+
+setInterval(() => {
+    var nowMinutes = new Date().getMinutes();
+    if (nowMinutes !== currentMinutes) {
+        currentMinutes = nowMinutes;
+        advance();
+    }
+}, 100);
+
