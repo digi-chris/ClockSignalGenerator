@@ -3,9 +3,6 @@ var Gpio = require('onoff').Gpio;
 var r1 = new Gpio(20, 'out');
 var r2 = new Gpio(21, 'out');
 
-//r1.writeSync(0);
-//r2.writeSync(0);
-
 var hourHand = 0;
 var minHand = 0;
 
@@ -64,15 +61,13 @@ function advance(noReset) {
         }
     }
 
+    console.log("Clock advancing: " + hourHand + ":" + minHand);
+
     if (!noReset) {
         setTimeout(() => {
             // This is a safety check, to turn the power off to the
             // clock after sending the signal
-            if (value === 0) {
-                r1.writeSync(1);
-            } else {
-                r1.writeSync(0);
-            }
+            r1.writeSync(1 - value);
         }, 100);
     }
 
@@ -83,7 +78,7 @@ function advance(noReset) {
     );
 }
 
-var currentMinutes = new Date().getMinutes();
+//var currentMinutes = new Date().getMinutes();
 
 const keypress = async () => {
     process.stdin.setRawMode(true);
@@ -110,8 +105,7 @@ autoAdvance(true);
 
 setInterval(() => {
     var nowMinutes = new Date().getMinutes();
-    if (nowMinutes !== currentMinutes && !advancing) {
-        currentMinutes = nowMinutes;
+    if (nowMinutes !== minHand && !advancing) {
         advance();
     }
 }, 100);
