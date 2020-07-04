@@ -5,15 +5,24 @@ var r2 = new Gpio(21, 'out');
 r1.writeSync(0);
 r2.writeSync(0);
 
-var hourHand = 8;
-var minHand = 27;
+var hourHand = 10;
+var minHand = 35;
 
 var polarity = false;
 
-function autoAdvance() {
-    advance(true);
-    if (minHand != new Date().getMinutes()) {
-        setTimeout(autoAdvance, 500);
+function autoAdvance(checkOnly) {
+    if (!checkOnly) {
+        advance(false);
+    }
+
+    var currentHour = new Date().getHours();
+    if (currentHour > 11) {
+        currentHour = currentHour - 12;
+    }
+
+    console.log("Clock reads: " + hourHand + ":" + minHand + " RT: " + currentHour + ":" + new Date().getMinutes());
+    if (minHand !== new Date().getMinutes() || currentHour !== hourHand) {
+        setTimeout(autoAdvance, 600);
     }
 }
 
@@ -44,7 +53,7 @@ function advance(noReset) {
             } else {
                 r1.writeSync(0);
             }
-        }, 250);
+        }, 100);
     }
 }
 
@@ -71,9 +80,7 @@ const keypress = async () => {
     //advance();
 })().then(process.exit);
 
-if (minHand != new Date().getMinutes()) {
-    autoAdvance();
-}
+autoAdvance(true);
 
 setInterval(() => {
     var nowMinutes = new Date().getMinutes();
