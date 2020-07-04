@@ -6,11 +6,26 @@ var r2 = new Gpio(21, 'out');
 //r1.writeSync(0);
 //r2.writeSync(0);
 
-var hourHand = 7;
-var minHand = 8;
+var hourHand = 0;
+var minHand = 0;
 
 var polarity = false;
 var advancing = false;
+
+function getLastKnownClockTime() {
+    try {
+        return JSON.parse(fs.readFileSync('time.json', 'utf8'));
+    } catch(e) {
+        return { hours: 0, minutes: 0 };
+    }
+}
+
+var clockTime = getLastKnownClockTime();
+hourHand = clockTime.hours;
+minHand = clockTime.minutes;
+
+console.log('time.json reports time as:');
+console.log(clockTime);
 
 function autoAdvance(checkOnly) {
     advancing = true;
