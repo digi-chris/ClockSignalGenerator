@@ -1,13 +1,47 @@
 var fs = require('fs');
+var express = require('express');
+var bodyParser = require('body-parser');
 var Gpio = require('onoff').Gpio;
 var r1 = new Gpio(20, 'out');
 var r2 = new Gpio(21, 'out');
+
+const app = express();
+const port = 3000;
 
 var hourHand = 0;
 var minHand = 0;
 
 var polarity = false;
 var advancing = false;
+
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.post('/', (req, res) => {
+    console.log(req.body.txtHours);
+    console.log(req.body.txtMinutes);
+    res.send('OK');
+    hourHand = parseInt(req.body.txtHours);
+    minHand = parseInt(req.body.txtMinutes);
+    autoAdvance(true);
+});
+
+app.get('/', (req, res) => {
+    res.send(`<html>
+  <head>
+    <title>ClockSignalGenerator</title>
+  </head>
+  <body>
+    <div>${hourHand}:${minHand}</div>
+    <form action="/" method="POST">
+      Hours: <input name="txtHours" type="text" />
+      Minutes: <input name="txtMinutes" type="text" />
+      <input type="submit" value="Set" />
+    </form>
+  </body>
+</html>`);
+});
+
+app.listen(port, () => console.log('Clock HTTP service running on port ' + port ));
 
 function getLastKnownClockTime() {
     try {
