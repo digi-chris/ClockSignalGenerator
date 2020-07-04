@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/digi-chris/ClockSignalGenerator/issues"
   },
-  "homepage": "https://github.com/digi-chris/ClockSignalGenerator#readme"
+  "homepage": "https://github.com/digi-chris/ClockSignalGenerator#readme",
+  "dependencies": {
+    "onoff": "^6.0.0"
+  }
 }
