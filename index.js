@@ -1,16 +1,19 @@
+var fs = require('fs');
 var Gpio = require('onoff').Gpio;
 var r1 = new Gpio(20, 'out');
 var r2 = new Gpio(21, 'out');
 
-r1.writeSync(0);
-r2.writeSync(0);
+//r1.writeSync(0);
+//r2.writeSync(0);
 
-var hourHand = 10;
-var minHand = 35;
+var hourHand = 7;
+var minHand = 8;
 
 var polarity = false;
+var advancing = false;
 
 function autoAdvance(checkOnly) {
+    advancing = true;
     if (!checkOnly) {
         advance(false);
     }
@@ -23,6 +26,8 @@ function autoAdvance(checkOnly) {
     console.log("Clock reads: " + hourHand + ":" + minHand + " RT: " + currentHour + ":" + new Date().getMinutes());
     if (minHand !== new Date().getMinutes() || currentHour !== hourHand) {
         setTimeout(autoAdvance, 600);
+    } else {
+        advancing = false;
     }
 }
 
@@ -55,6 +60,12 @@ function advance(noReset) {
             }
         }, 100);
     }
+
+    fs.writeFile(
+        'time.json',
+        JSON.stringify({ hours: hourHand, minutes: minHand }),
+        (err) => { if (err) console.error(err); }
+    );
 }
 
 var currentMinutes = new Date().getMinutes();
@@ -84,7 +95,7 @@ autoAdvance(true);
 
 setInterval(() => {
     var nowMinutes = new Date().getMinutes();
-    if (nowMinutes !== currentMinutes) {
+    if (nowMinutes !== currentMinutes && !advancing) {
         currentMinutes = nowMinutes;
         advance();
     }
